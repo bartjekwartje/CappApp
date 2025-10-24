@@ -1,4 +1,4 @@
-  workflows:
+workflows:
   ios-capacitor:
     name: iOS – Capacitor (TestFlight)
     max_build_duration: 120
