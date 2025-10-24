@@ -1,4 +1,4 @@
-workflows:
+  workflows:
   ios-capacitor:
     name: iOS – Capacitor (TestFlight)
     max_build_duration: 120
@@ -50,49 +50,3 @@ workflows:
             --workspace "$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME"
 
-    artifacts:
-      - build/ios/ipa/*.ipa
-      - ios/App/build/**/*.log
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.xcarchive
-
-    publishing:
-      app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-        submit_to_testflight: true
-        # Optional: automatically add to these TestFlight groups
-        beta_groups:
-          - Internal Testers
-
-  ios-capacitor-simulator:
-    name: iOS – Capacitor (Simulator, no signing)
-    max_build_duration: 60
-    instance_type: mac_mini_m2
-    environment:
-      xcode: 16.0
-      node: 20
-      cocoapods: default
-      vars:
-        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
-        XCODE_SCHEME: "App"
-    scripts:
-      - name: Install deps & build web
-        script: |
-          npm ci
-          npm run build
-          npx cap sync ios
-      - name: Install CocoaPods
-        working_directory: ios/App
-        script: pod install
-      - name: Build .app for Simulator
-        script: |
-          xcodebuild \
-            -workspace "$XCODE_WORKSPACE" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
-            build | xcpretty
-    artifacts:
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/Products/Debug-iphonesimulator/*.app
