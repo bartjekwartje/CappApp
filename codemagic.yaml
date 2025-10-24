@@ -1,6 +1,6 @@
 workflows:
   ios-capacitor:
-    name: iOS – Capacitor (TestFlight)
+    name: iOS - Capacitor (TestFlight)
     max_build_duration: 120
     instance_type: mac_mini_m2
     cache:
