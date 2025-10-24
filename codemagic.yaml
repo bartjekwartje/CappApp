@@ -31,8 +31,6 @@ workflows:
           xcodebuild -version
       - name: Install JS deps
         script: npm ci
-      - name: Build web assets
-        script: npm run build
       - name: Sync Capacitor iOS
         script: npx cap sync ios
       - name: Install CocoaPods
