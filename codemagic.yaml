@@ -1,0 +1,98 @@
+workflows:
+  ios-capacitor:
+    name: iOS – Capacitor (TestFlight)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    environment:
+      xcode: 16.0
+      node: 20
+      cocoapods: default
+      # Keep your Apple API key in secure environment variables or a Team “group”
+      vars:
+        BUNDLE_ID: "com.example.myapp"     # <-- change this
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"                # Capacitor default
+        APP_STORE_CONNECT_ISSUER_ID: Encrypted(…)
+        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(…)
+        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(…)
+      # Cache to speed up builds
+      cache:
+        cache_paths:
+          - ~/.npm
+          - ~/Library/Caches/CocoaPods
+          - ios/App/Pods
+
+    scripts:
+      - name: Show versions
+        script: |
+          node -v
+          npm -v
+          xcodebuild -version
+      - name: Install JS deps
+        script: npm ci
+      - name: Build web assets
+        script: npm run build
+      - name: Sync Capacitor iOS
+        script: npx cap sync ios
+      - name: Install CocoaPods
+        working_directory: ios/App
+        script: pod install
+      - name: Code signing (automatic via App Store Connect API key)
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Build .ipa
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - ios/App/build/**/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.xcarchive
+
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
+        # Optional: automatically add to these TestFlight groups
+        beta_groups:
+          - Internal Testers
+
+  ios-capacitor-simulator:
+    name: iOS – Capacitor (Simulator, no signing)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      xcode: 16.0
+      node: 20
+      cocoapods: default
+      vars:
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+    scripts:
+      - name: Install deps & build web
+        script: |
+          npm ci
+          npm run build
+          npx cap sync ios
+      - name: Install CocoaPods
+        working_directory: ios/App
+        script: pod install
+      - name: Build .app for Simulator
+        script: |
+          xcodebuild \
+            -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            build | xcpretty
+    artifacts:
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/Products/Debug-iphonesimulator/*.app
