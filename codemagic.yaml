@@ -18,9 +18,9 @@ workflows:
         BUNDLE_ID: "com.example.myapp"     # <-- change this
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"                # Capacitor default
-        APP_STORE_CONNECT_ISSUER_ID: Encrypted(…)
-        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(…)
-        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(…)
+        APP_STORE_CONNECT_ISSUER_ID: Encrypted()
+        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted()
+        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted()
       # Cache to speed up builds
 
     scripts:
