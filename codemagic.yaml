@@ -3,6 +3,11 @@ workflows:
     name: iOS – Capacitor (TestFlight)
     max_build_duration: 120
     instance_type: mac_mini_m2
+    cache:
+      cache_paths:
+        - ~/.npm
+        - ~/Library/Caches/CocoaPods
+        - ios/App/Pods
 
     environment:
       xcode: 16.0
@@ -17,11 +22,6 @@ workflows:
         APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(…)
         APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(…)
       # Cache to speed up builds
-      cache:
-        cache_paths:
-          - ~/.npm
-          - ~/Library/Caches/CocoaPods
-          - ios/App/Pods
 
     scripts:
       - name: Show versions
