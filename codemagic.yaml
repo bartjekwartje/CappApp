@@ -31,8 +31,16 @@ workflows:
           xcodebuild -version
       - name: Install JS deps
         script: npm ci
+      - name: Tooling versions
+        script: |
+          node -v
+          npm -v
+          npx --version
+          npx --yes @capacitor/cli --version
+      - name: Prepare web assets
+        script: echo "No build step needed; www/ folder is already ready."
       - name: Sync Capacitor iOS
-        script: npx cap sync ios
+        script: npx --yes @capacitor/cli@latest sync ios
       - name: Install CocoaPods
         working_directory: ios/App
         script: pod install
